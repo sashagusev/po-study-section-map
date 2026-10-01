@@ -1,0 +1,430 @@
+<title>PO–Study Section Map</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=Public+Sans:wght@400;500;600;700&family=Source+Serif+4:opsz,wght@8..60,600;8..60,700&display=swap">
+<style>
+/* Layout: a two-pane directory. Searchable roster on the left, the selected portfolio's review breakdown on the right; stacks on phones. */
+:root {
+  --bg: #f3f5f8;
+  --surface: #ffffff;
+  --ink: #18212e;
+  --muted: #586374;
+  --line: #dbe0e8;
+  --accent: #23479a;
+  --accent-soft: #e2e9f8;
+  --bar: #3b63c4;
+  --sep: #8c5a00;
+  --sep-soft: #f7ebd2;
+  --sep-bar: #c98a1a;
+  --focus: #23479a;
+  --font-display: "Source Serif 4", Georgia, "Times New Roman", serif;
+  --font-ui: "Public Sans", -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  --font-data: "IBM Plex Mono", ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
+  --r: 6px;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #10141b; --surface: #171d26; --ink: #e4e9f1; --muted: #9aa5b6; --line: #29313e;
+    --accent: #9db6f2; --accent-soft: #1f2a44; --bar: #6f93e6;
+    --sep: #e8bb6a; --sep-soft: #352a15; --sep-bar: #c9922e; --focus: #9db6f2;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #10141b; --surface: #171d26; --ink: #e4e9f1; --muted: #9aa5b6; --line: #29313e;
+  --accent: #9db6f2; --accent-soft: #1f2a44; --bar: #6f93e6;
+  --sep: #e8bb6a; --sep-soft: #352a15; --sep-bar: #c9922e; --focus: #9db6f2;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--bg); color: var(--ink); font-family: var(--font-ui); font-size: 14px; line-height: 1.45; }
+.wrap { max-width: 1280px; margin: 0 auto; padding-inline: 20px; padding-block: 22px 40px; display: grid; gap: 16px; }
+h1, h2 { font-family: var(--font-display); font-weight: 700; text-wrap: balance; margin: 0; letter-spacing: -0.01em; }
+h1 { font-size: 1.9rem; line-height: 1.15; }
+h2 { font-size: 1.5rem; line-height: 1.2; }
+h3 { font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.08em; color: var(--muted); margin: 0; font-weight: 600; }
+.mono { font-family: var(--font-data); }
+.num { font-variant-numeric: tabular-nums; }
+a { color: var(--accent); }
+button, input, select { font: inherit; color: inherit; }
+:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
+
+header { display: grid; gap: 6px; }
+.lede { color: var(--muted); max-width: 70ch; margin: 0; }
+.stats { display: flex; flex-wrap: wrap; gap: 6px 18px; color: var(--muted); font-size: 0.82rem; }
+.stats b { color: var(--ink); font-weight: 600; }
+.tools { margin: 4px 0 0; display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 8px; font-size: 0.85rem; color: var(--muted); }
+.tools a { font-weight: 600; text-underline-offset: 2px; }
+.tools .tools-d { margin-right: 10px; }
+@media (max-width: 560px) { .tools .tools-d { display: none; } }
+
+.controls { display: flex; flex-wrap: wrap; gap: 10px 14px; align-items: center; background: var(--surface); border: 1px solid var(--line); border-radius: var(--r); padding: 10px 12px; }
+.seg { display: inline-flex; border: 1px solid var(--line); border-radius: var(--r); overflow: hidden; }
+.seg button { border: 0; background: transparent; padding: 6px 12px; cursor: pointer; font-weight: 600; color: var(--muted); }
+.seg button[aria-pressed="true"] { background: var(--accent); color: var(--surface); }
+.search { flex: 1 1 220px; min-width: 0; padding: 7px 10px; border: 1px solid var(--line); border-radius: var(--r); background: var(--bg); }
+select { padding: 6px 8px; border: 1px solid var(--line); border-radius: var(--r); background: var(--bg); }
+label.chk { display: inline-flex; gap: 6px; align-items: center; color: var(--muted); cursor: pointer; white-space: nowrap; }
+
+.panes { display: grid; grid-template-columns: minmax(0, 360px) minmax(0, 1fr); gap: 16px; align-items: start; }
+.list { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r); max-height: calc(100vh - 220px); min-height: 320px; overflow: auto; position: sticky; top: calc(env(safe-area-inset-top, 0px) + 12px); }
+.list-head { position: sticky; top: 0; background: var(--surface); border-bottom: 1px solid var(--line); padding: 8px 12px; font-size: 0.78rem; color: var(--muted); display: flex; justify-content: space-between; gap: 8px; z-index: 1; }
+.item { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 2px 10px; width: 100%; text-align: left; padding: 9px 12px; border: 0; border-bottom: 1px solid var(--line); background: transparent; cursor: pointer; }
+.item:hover { background: var(--bg); }
+.item[aria-current="true"] { background: var(--accent-soft); box-shadow: inset 3px 0 0 var(--accent); }
+.item .nm { font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.item .ct { font-family: var(--font-data); font-size: 0.8rem; color: var(--muted); }
+.item .sub { grid-column: 1 / -1; font-size: 0.78rem; color: var(--muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.more { padding: 10px 12px; color: var(--muted); font-size: 0.8rem; }
+
+.detail { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r); padding: 18px 20px 22px; display: grid; gap: 18px; min-width: 0; }
+.dhead { display: grid; gap: 8px; }
+.facts { display: flex; flex-wrap: wrap; gap: 6px 18px; color: var(--muted); font-size: 0.85rem; }
+.facts b { color: var(--ink); font-family: var(--font-data); font-weight: 500; }
+.chips { display: flex; flex-wrap: wrap; gap: 6px; }
+.chip { font-family: var(--font-data); font-size: 0.75rem; padding: 2px 7px; border-radius: 999px; background: var(--bg); border: 1px solid var(--line); color: var(--muted); white-space: nowrap; }
+.chip.ic { background: var(--accent-soft); border-color: transparent; color: var(--accent); font-weight: 500; }
+.chip.sep { background: var(--sep-soft); border-color: transparent; color: var(--sep); }
+.chip.std { background: var(--accent-soft); border-color: transparent; color: var(--accent); }
+
+.block { display: grid; gap: 8px; }
+.tbl-wrap { overflow-x: auto; }
+table { border-collapse: collapse; width: 100%; }
+th { text-align: left; font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted); font-weight: 600; padding: 6px 8px; border-bottom: 1px solid var(--line); white-space: nowrap; }
+td { padding: 7px 8px; border-bottom: 1px solid var(--line); vertical-align: middle; }
+th.r, td.r { text-align: right; }
+tr.row { cursor: pointer; }
+tr.row:hover td { background: var(--bg); }
+tr.row[aria-expanded="true"] td { background: var(--accent-soft); }
+.code { font-family: var(--font-data); font-size: 0.8rem; font-weight: 500; white-space: nowrap; }
+.sep-row .code { color: var(--sep); }
+.std-row .code { color: var(--accent); }
+.secname { min-width: 200px; width: 46%; }
+.secname small { display: block; color: var(--muted); font-size: 0.75rem; }
+.barcell { width: 24%; min-width: 110px; }
+.bar { display: flex; align-items: center; gap: 8px; }
+.bar i { display: block; height: 8px; border-radius: 2px; background: var(--bar); min-width: 2px; }
+.sep-row .bar i { background: var(--sep-bar); }
+.bar span { font-family: var(--font-data); font-size: 0.78rem; color: var(--muted); }
+.linkbtn { background: none; border: 0; padding: 0; color: var(--accent); cursor: pointer; text-decoration: underline; text-underline-offset: 2px; font-size: 0.8rem; }
+.grants td { background: var(--bg); padding: 0; }
+.glist { display: grid; gap: 0; padding: 6px 10px 10px; }
+.g { display: grid; grid-template-columns: 150px minmax(0, 1fr) auto; gap: 2px 12px; padding: 7px 0; border-bottom: 1px dashed var(--line); font-size: 0.82rem; }
+.g:last-child { border-bottom: 0; }
+.g .pn { font-family: var(--font-data); font-size: 0.78rem; }
+.g .ti { min-width: 0; }
+.g .ti small { display: block; color: var(--muted); }
+.g .fy { font-family: var(--font-data); font-size: 0.75rem; color: var(--muted); white-space: nowrap; }
+.new { font-family: var(--font-data); font-size: 0.68rem; color: var(--accent); border: 1px solid currentColor; border-radius: 3px; padding: 0 4px; margin-left: 4px; }
+.empty { color: var(--muted); padding: 10px 0; }
+.note { color: var(--muted); font-size: 0.8rem; }
+
+details.method { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r); padding: 12px 16px; }
+details.method summary { cursor: pointer; font-weight: 600; }
+details.method ul { margin: 10px 0 0; padding-left: 18px; color: var(--muted); max-width: 90ch; display: grid; gap: 6px; }
+
+@media (max-width: 820px) {
+  .panes { grid-template-columns: minmax(0, 1fr); }
+  .list { position: static; max-height: 320px; min-height: 0; }
+  h1 { font-size: 1.55rem; }
+}
+@media (max-width: 560px) {
+  .wrap { padding-inline: 16px; }
+  .detail { padding: 14px 12px 18px; }
+  .hide-sm { display: none; }
+  .barcell { min-width: 90px; }
+  .secname { min-width: 150px; }
+  .g { grid-template-columns: minmax(0, 1fr) auto; }
+  .g .pn { grid-column: 1 / -1; }
+}
+@media (prefers-reduced-motion: reduce) { * { scroll-behavior: auto !important; } }
+</style>
+
+<div class="wrap">
+  <header>
+    <h1>PO–Study Section Map</h1>
+    <p class="lede" id="lede">Which study sections the grants managed by each NIH program officer were reviewed in. Counts are distinct grants (core project numbers) with an award record in the window.</p>
+    <div class="stats" id="stats"></div>
+    <p class="tools"><span>Start from your own abstract:</span>
+      <a href="https://reporter.nih.gov/matchmaker" target="_blank" rel="noopener">RePORTER Matchmaker</a> <span class="tools-d">finds similar funded projects, with their program officers and study sections</span>
+      <a href="https://public.csr.nih.gov/ForApplicants/ArtHome" target="_blank" rel="noopener">CSR Assisted Referral Tool</a> <span class="tools-d">recommends study sections for your application text</span>
+    </p>
+  </header>
+
+  <div class="controls" role="search">
+    <div class="seg" role="group" aria-label="View">
+      <button type="button" id="v-po" aria-pressed="true">By program officer</button>
+      <button type="button" id="v-ss" aria-pressed="false">By study section</button>
+    </div>
+    <input class="search" id="q" type="search" placeholder="Search program officers" autocomplete="off" aria-label="Search">
+    <select id="ic" aria-label="Institute"><option value="">All institutes</option></select>
+    <label class="chk"><input type="checkbox" id="active" checked> Active POs only</label>
+    <label class="chk"><input type="checkbox" id="sep" checked> Include special emphasis panels</label>
+  </div>
+
+  <div class="panes">
+    <nav class="list" id="list" aria-label="Results"></nav>
+    <main class="detail" id="detail" aria-live="polite"></main>
+  </div>
+
+  <details class="method" id="method">
+    <summary>How this was built</summary>
+    <ul id="method-list"></ul>
+    <p class="note">An independent analysis of public NIH RePORTER data. Not affiliated with or endorsed by NIH. Code and CSV exports: <a href="https://github.com/sashagusev/po-study-section-map" target="_blank" rel="noopener">github.com/sashagusev/po-study-section-map</a>.</p>
+  </details>
+</div>
+
+<script id="data" type="application/json">__DATA__</script>
+<script>
+(function () {
+  const D = JSON.parse(document.getElementById("data").textContent);
+  const M = D.meta;
+  const ACTIVE_FY = M.fy_last - 1;
+  const LIST_CAP = 400;
+  const SS = D.ss.map(([key, label, kind, rev, total], i) => ({ i, key, label, kind, rev, total, pos: [] }));
+  const PO = D.po.map(([name, ic, total, last, pairs, acts], i) => ({ i, name, ic, total, last, pairs, acts, lc: name.toLowerCase() }));
+  for (const p of PO) for (const [si, n, nNew, last] of p.pairs) SS[si].pos.push([p.i, n, nNew, last]);
+  for (const s of SS) s.pos.sort((a, b) => b[1] - a[1]);
+  const ICS = [...new Set(PO.map(p => p.ic))].sort();
+
+  const $ = id => document.getElementById(id);
+  const esc = s => String(s ?? "").replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+  const fmt = n => n.toLocaleString("en-US");
+  const pct = x => (x >= 0.995 ? "100" : x < 0.005 ? "<1" : Math.round(x * 100)) + "%";
+
+  const S = { view: "po", q: "", ic: "", active: true, sep: true, po: null, ss: null, open: null };
+  const shards = {};
+
+  $("stats").innerHTML = [
+    ["Fiscal years", `${M.fy_first}–${M.fy_last}`],
+    ["Grants", fmt(M.grants)],
+    ["Program officers", fmt(M.pos)],
+    ["Study sections and panel groups", fmt(M.sections)],
+    ["Source", `NIH RePORTER API, pulled ${M.pulled}`],
+  ].map(([k, v]) => `<span>${k} <b class="num">${v}</b></span>`).join("");
+  $("ic").insertAdjacentHTML("beforeend", ICS.map(c => `<option value="${c}">${c}</option>`).join(""));
+  $("method-list").innerHTML = [
+    `Every NIH-administered award record for fiscal years ${M.fy_first}–${M.fy_last} (${fmt(M.records)} records) was pulled from the RePORTER v2 API with its program official and study section.`,
+    `Records are collapsed to distinct grants by core project number. A grant counts once for each program officer and study section listed on any of its records in the window, so a renewal reviewed in a different section counts in both.`,
+    `The study section is the review group RePORTER lists for the award. Non-competing years carry the section of the competing review that produced them, which can predate the window.`,
+    `Special emphasis panels are one-off meetings, so they are grouped by the reviewing office and branch code in the panel name (for example ZRG1 CTH = a CSR panel from the CTH branch, ZCA1 SRB = an NCI panel).`,
+    `Excluded: records with no listed program officer (mostly components of multi-project awards, contracts and intramural projects), records with no study section, and records marked NSS, meaning not separately peer reviewed (R00 phases, R37 extensions, R33 transitions).`,
+    `Program officers are matched on first and last name. Active POs are those named on at least one award record in FY${ACTIVE_FY} or FY${M.fy_last}. A PO's institute is the one that administers most of their grants.`,
+    `Shares are of the PO's distinct grants. In the study section view, the share is of all grants reviewed in that section in the window.`,
+  ].map(t => `<li>${t}</li>`).join("");
+
+  function poVisible(p) {
+    if (S.active && p.last < ACTIVE_FY) return false;
+    if (S.ic && p.ic !== S.ic) return false;
+    return true;
+  }
+  function ssCountFor(s) {
+    if (!S.ic && !S.active) return s.total;
+    let n = 0;
+    for (const [pi, c] of s.pos) if (poVisible(PO[pi])) n += c;
+    return n;
+  }
+
+  function listItems() {
+    const q = S.q.trim().toLowerCase();
+    if (S.view === "po") {
+      return PO.filter(p => poVisible(p) && (!q || p.lc.includes(q))).map(p => ({ id: p.i, p }));
+    }
+    const out = [];
+    for (const s of SS) {
+      if (!S.sep && s.kind === "P") continue;
+      if (q && !s.key.toLowerCase().includes(q) && !s.label.toLowerCase().includes(q)) continue;
+      const n = ssCountFor(s);
+      if (!n) continue;
+      out.push({ id: s.i, s, n });
+    }
+    out.sort((a, b) => b.n - a.n);
+    return out;
+  }
+
+  function topCodes(p) {
+    return p.pairs.filter(([si]) => S.sep || SS[si].kind === "S").slice(0, 4).map(([si, n]) => `${SS[si].key} ${n}`).join(" · ");
+  }
+
+  function renderList() {
+    const items = listItems();
+    const cur = S.view === "po" ? S.po : S.ss;
+    if (items.length && (cur === null || !items.some(it => it.id === cur))) {
+      if (S.view === "po") S.po = items[0].id; else S.ss = items[0].id;
+    }
+    const sel = S.view === "po" ? S.po : S.ss;
+    const noun = S.view === "po" ? "program officers" : "study sections";
+    let html = `<div class="list-head"><span>${fmt(items.length)} ${noun}</span><span>grants</span></div>`;
+    if (!items.length) html += `<div class="more">No ${noun} match. Clear the search or loosen the filters.</div>`;
+    for (const it of items.slice(0, LIST_CAP)) {
+      if (S.view === "po") {
+        const p = it.p;
+        html += `<button type="button" class="item" data-id="${p.i}" aria-current="${p.i === sel}">
+          <span class="nm">${esc(p.name)}</span><span class="ct num">${fmt(p.total)}</span>
+          <span class="sub"><span class="mono">${p.ic}</span> · ${esc(topCodes(p))}</span></button>`;
+      } else {
+        const s = it.s;
+        html += `<button type="button" class="item" data-id="${s.i}" aria-current="${s.i === sel}">
+          <span class="nm"><span class="mono">${esc(s.key)}</span> ${s.kind === "S" ? esc(s.label) : ""}</span><span class="ct num">${fmt(it.n)}</span>
+          <span class="sub">${s.kind === "P" ? "Special emphasis panels · " + esc(s.rev) : "Standing section"} · ${fmt(s.pos.filter(([pi]) => poVisible(PO[pi])).length)} POs</span></button>`;
+      }
+    }
+    if (items.length > LIST_CAP) html += `<div class="more">Showing the top ${LIST_CAP} of ${fmt(items.length)}. Search to find others.</div>`;
+    $("list").innerHTML = html;
+  }
+
+  function sectionRows(p, kind) {
+    const rows = p.pairs.filter(([si]) => SS[si].kind === kind);
+    if (!rows.length) return `<p class="empty">None in this window.</p>`;
+    const max = rows[0][1];
+    let h = `<div class="tbl-wrap"><table><thead><tr><th>Section</th><th class="r">Grants</th><th class="barcell">Share of PO's grants</th><th class="r hide-sm">New / renewal</th><th class="r hide-sm">Last FY</th></tr></thead><tbody>`;
+    for (const [si, n, nNew, last] of rows) {
+      const s = SS[si];
+      const open = S.open === si;
+      h += `<tr class="row ${kind === "P" ? "sep-row" : "std-row"}" data-si="${si}" aria-expanded="${open}" tabindex="0">
+        <td class="secname"><span class="code">${esc(s.key)}</span>${kind === "S" ? `<small>${esc(s.label)}</small>` : `<small>${esc(s.rev)} panels</small>`}</td>
+        <td class="r num mono">${fmt(n)}</td>
+        <td class="barcell"><div class="bar"><i style="width:${Math.max(2, (n / max) * 78)}%"></i><span>${pct(n / p.total)}</span></div></td>
+        <td class="r num mono hide-sm">${fmt(nNew)}</td>
+        <td class="r num mono hide-sm">${last}</td></tr>`;
+      if (open) h += `<tr class="grants"><td colspan="5"><div class="glist" id="glist">Loading grants…</div></td></tr>`;
+    }
+    return h + `</tbody></table></div>`;
+  }
+
+  function renderPO() {
+    const p = PO[S.po];
+    if (!p) { $("detail").innerHTML = `<p class="empty">Pick a program officer from the list.</p>`; return; }
+    const std = p.pairs.filter(([si]) => SS[si].kind === "S");
+    const stdN = std.reduce((a, r) => a + r[1], 0);
+    $("detail").innerHTML = `
+      <div class="dhead">
+        <h2>${esc(p.name)}</h2>
+        <div class="facts">
+          <span><span class="chip ic">${p.ic}</span></span>
+          <span>Grants <b>${fmt(p.total)}</b></span>
+          <span>Standing sections <b>${std.length}</b></span>
+          <span>Last award FY <b>${p.last}</b></span>
+        </div>
+        <div class="chips">${p.acts.map(([a, n]) => `<span class="chip">${esc(a)} ${n}</span>`).join("")}</div>
+      </div>
+      <section class="block"><h3>Standing study sections</h3>${sectionRows(p, "S")}</section>
+      ${S.sep ? `<section class="block"><h3>Special emphasis panels, grouped by reviewing office</h3>${sectionRows(p, "P")}</section>` : ""}
+      <p class="note">Select a row to see the grants. A grant reviewed in more than one section across renewals appears under each.</p>`;
+    if (S.open !== null) loadGrants(p, S.open);
+  }
+
+  async function loadGrants(p, si) {
+    const box = $("glist");
+    if (!box) return;
+    try {
+      if (!shards[p.ic]) shards[p.ic] = fetch(`grants/${p.ic}.json`).then(r => { if (!r.ok) throw new Error(r.status); return r.json(); });
+      const rows = (await shards[p.ic]).filter(r => r[0] === p.i && r[1] === si);
+      if ($("glist") !== box) return;
+      const s = SS[si];
+      box.innerHTML = (rows.length ? rows.map(([, , num, appl, fy, first, isNew, title, pi, org]) => `
+        <div class="g"><a class="pn" href="https://reporter.nih.gov/project-details/${appl}" target="_blank" rel="noopener">${esc(num)}</a>
+        <div class="ti">${esc(title)}${isNew ? '<span class="new">NEW/RENEWAL</span>' : ""}<small>${esc(pi)}${org ? " · " + esc(org) : ""}</small></div>
+        <span class="fy">FY${first === fy ? fy : first + "–" + String(fy).slice(2)}</span></div>`).join("") : `<p class="empty">No grant details found.</p>`)
+        + `<p class="note">${rows.length} grants. <button type="button" class="linkbtn" data-goto-ss="${si}">See every PO with grants from ${esc(s.key)}</button></p>`;
+    } catch (e) {
+      box.innerHTML = `<p class="empty">The grant list didn't load. Reload the page to try again.</p>`;
+    }
+  }
+
+  function renderSS() {
+    const s = SS[S.ss];
+    if (!s) { $("detail").innerHTML = `<p class="empty">Pick a study section from the list.</p>`; return; }
+    const rows = s.pos.filter(([pi]) => poVisible(PO[pi]));
+    const hidden = s.pos.length - rows.length;
+    const max = rows.length ? rows[0][1] : 1;
+    let t = `<div class="tbl-wrap"><table><thead><tr><th>Program officer</th><th class="r">Grants</th><th class="barcell">Share of section</th><th class="r hide-sm">Share of PO's grants</th><th class="r hide-sm">Last FY</th></tr></thead><tbody>`;
+    for (const [pi, n, , last] of rows) {
+      const p = PO[pi];
+      t += `<tr class="row ${s.kind === "P" ? "sep-row" : "std-row"}" data-pi="${pi}" tabindex="0">
+        <td class="secname"><strong>${esc(p.name)}</strong><small>${p.ic} · ${fmt(p.total)} grants total</small></td>
+        <td class="r num mono">${fmt(n)}</td>
+        <td class="barcell"><div class="bar"><i style="width:${Math.max(2, (n / max) * 78)}%"></i><span>${pct(n / s.total)}</span></div></td>
+        <td class="r num mono hide-sm">${pct(n / p.total)}</td>
+        <td class="r num mono hide-sm">${last}</td></tr>`;
+    }
+    t += `</tbody></table></div>`;
+    $("detail").innerHTML = `
+      <div class="dhead">
+        <h2><span class="mono" style="font-size:0.8em">${esc(s.key)}</span>${s.kind === "S" ? " " + esc(s.label) : ""}</h2>
+        <div class="facts">
+          <span><span class="chip ${s.kind === "P" ? "sep" : "std"}">${s.kind === "P" ? "Special emphasis panels · " + esc(s.rev) : "Standing study section"}</span></span>
+          <span>Grants <b>${fmt(s.total)}</b></span>
+          <span>Program officers <b>${s.pos.length}</b></span>
+        </div>
+      </div>
+      <section class="block"><h3>Program officers managing grants from this section</h3>
+      ${rows.length ? t : `<p class="empty">No program officers match the current filters.</p>`}
+      ${hidden ? `<p class="note">${hidden} more POs are hidden by the institute or active-PO filters.</p>` : ""}</section>
+      <p class="note">Select a program officer to see their full breakdown.</p>`;
+  }
+
+  function render() {
+    renderList();
+    if (S.view === "po") renderPO(); else renderSS();
+    const tok = S.view === "po" ? `po${S.po}` : `ss${S.ss}`;
+    try { history.replaceState(null, "", "#" + tok); } catch (e) {}
+  }
+
+  function setView(v) {
+    S.view = v;
+    $("v-po").setAttribute("aria-pressed", v === "po");
+    $("v-ss").setAttribute("aria-pressed", v === "ss");
+    $("q").placeholder = v === "po" ? "Search program officers" : "Search study sections, e.g. CG or genetics";
+  }
+
+  $("v-po").addEventListener("click", () => { setView("po"); S.q = ""; $("q").value = ""; render(); });
+  $("v-ss").addEventListener("click", () => { setView("ss"); S.q = ""; $("q").value = ""; render(); });
+  let qt;
+  $("q").addEventListener("input", e => { clearTimeout(qt); qt = setTimeout(() => { S.q = e.target.value; render(); }, 120); });
+  $("ic").addEventListener("change", e => { S.ic = e.target.value; render(); });
+  $("active").addEventListener("change", e => { S.active = e.target.checked; render(); });
+  $("sep").addEventListener("change", e => { S.sep = e.target.checked; render(); });
+
+  $("list").addEventListener("click", e => {
+    const b = e.target.closest(".item");
+    if (!b) return;
+    const id = +b.dataset.id;
+    if (S.view === "po") { S.po = id; S.open = null; } else S.ss = id;
+    render();
+    if (window.matchMedia("(max-width: 820px)").matches) $("detail").scrollIntoView({ block: "start" });
+  });
+
+  function activateRow(tr) {
+    if (tr.dataset.si !== undefined) { const si = +tr.dataset.si; S.open = S.open === si ? null : si; renderPO(); }
+    else if (tr.dataset.pi !== undefined) {
+      const pi = +tr.dataset.pi;
+      setView("po"); S.q = ""; $("q").value = ""; S.po = pi; S.open = S.ss;
+      if (!poVisible(PO[pi])) { S.ic = ""; $("ic").value = ""; S.active = false; $("active").checked = false; }
+      render();
+    }
+  }
+  $("detail").addEventListener("click", e => {
+    const go = e.target.closest("[data-goto-ss]");
+    if (go) { const si = +go.dataset.gotoSs; setView("ss"); S.q = ""; $("q").value = ""; S.ss = si; if (SS[si].kind === "P") { S.sep = true; $("sep").checked = true; } render(); return; }
+    if (e.target.closest("a")) return;
+    const tr = e.target.closest("tr.row");
+    if (tr) activateRow(tr);
+  });
+  $("detail").addEventListener("keydown", e => {
+    if (e.key !== "Enter" && e.key !== " ") return;
+    const tr = e.target.closest("tr.row");
+    if (tr) { e.preventDefault(); activateRow(tr); }
+  });
+
+  const h = (location.hash || "").slice(1);
+  const m = /^(po|ss)(\d+)$/.exec(h);
+  if (m) {
+    setView(m[1]);
+    const id = +m[2];
+    if (m[1] === "po" && PO[id]) { S.po = id; if (!poVisible(PO[id])) { S.active = false; $("active").checked = false; } }
+    if (m[1] === "ss" && SS[id]) S.ss = id;
+  }
+  render();
+})();
+</script>
